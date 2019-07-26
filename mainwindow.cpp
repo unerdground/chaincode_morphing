@@ -22,7 +22,7 @@ int MainWindow::min_of_three(int first, int second, int third){
     else return third;
 }
 
-QPair<QString, int> MainWindow::editDistance(QVector<int> source, QVector<int> target){
+QString MainWindow::editDistance(QVector<int> source, QVector<int> target){
     int** matrix = new int*[source.size() + 1];
     char** edit = new char*[source.size() + 1];
     for (int i = 0; i < source.size() + 1; i++){
@@ -83,7 +83,7 @@ QPair<QString, int> MainWindow::editDistance(QVector<int> source, QVector<int> t
 
     delete[] matrix;
     delete[] edit;
-    return QPair<QString,int>(presc.data(), matrix[source.size()][target.size()]);
+    return presc.data();
     }
 }
 
@@ -102,8 +102,38 @@ QVector<int> MainWindow::buidCodeByPrescription(QString presc, QVector<int> sour
     return source;
 }
 
-void MainWindow::morphing(int dist, QString presc, QString first, QString second){
+void MainWindow::morphing(QString presc, imageHandler source_img, QVector<int> target){
+   QVector<int> temp_presc;
+   QVector<int> source = source_img.getChaincode();
+    for (int i = 0; i < presc.size(); i++){
+        if (presc[i] != 'M'){
+            temp_presc.push_back(i);
+        }
+    }
+    int j = 0;
+    for (int i = 1; i < iteration + 1; i++){
+        for (int k = (i - 1)*temp_presc.size()/iteration; k < (i*temp_presc.size()/iteration); k++){
 
+            if (presc[temp_presc[k]] == 'R'){
+                source[temp_presc[k] - j] = target[temp_presc[k] - j];
+            } else if (presc[temp_presc[k]] == 'I'){
+                source.insert(temp_presc[k] - j, target[temp_presc[k] - j]);
+            } else if (presc[temp_presc[k]] == 'D'){
+                source.remove(temp_presc[k] - j, 1);
+                j++;
+            }
+        }
+        source_img.setChaincode(source);
+        source_img.writeToImageFromString("out_" + QString::number(i) + ".png");
+    }
+}
+
+void MainWindow::delay(int ms){
+    QTime dieTime = QTime::currentTime().addMSecs( ms );
+        while( QTime::currentTime() < dieTime )
+        {
+            QCoreApplication::processEvents( QEventLoop::AllEvents, 100 );
+        }
 }
 
 void MainWindow::on_pushButton_clicked()
@@ -126,14 +156,14 @@ void MainWindow::on_pushButton_clicked()
 
 
         //ui->log->setText(editDistance(first.getChaincode(), second.getChaincode()));
-        ui->log->setText(editDistance(first.getChaincode(), second.getChaincode()).first + "\n" + first.writeChaincode() + "\n" + second.writeChaincode());
+        ui->log->setText(editDistance(first.getChaincode(), second.getChaincode()) + "\n" + first.writeChaincode() + "\n" + second.writeChaincode());
+        morphing(editDistance(first.getChaincode(), second.getChaincode()), first, second.getChaincode());
 
-        first.setChaincode(buidCodeByPrescription(editDistance(first.getChaincode(), second.getChaincode()).first, first.getChaincode(), second.getChaincode()));
+        //first.setChaincode(buidCodeByPrescription(editDistance(first.getChaincode(), second.getChaincode()), first.getChaincode(), second.getChaincode()));
         //  END OF TEST SECTION
 
-        first.writeToImageFromString("out.png");
-        QPixmap map("out.png");
-        ui->result_img_box->setPixmap(map);
+        ui->result_button->setEnabled(1);
+
         ui->statusBar->showMessage("Done");
 
 
@@ -184,4 +214,29 @@ void MainWindow::on_horizontalSlider_sliderMoved(int position)
 {
     iteration = position;
     ui->it_counter->setText(QString::number(iteration));
+    ui->result_button->setEnabled(0);
+}
+
+void MainWindow::on_result_button_clicked()
+{
+    QPixmap map(filename_first);
+    ui->result_img_box->setPixmap(map);
+    delay(200);
+    //first.writeToImageFromString("out.png");
+    for (int i = 1; i <= iteration; i++){
+        QPixmap map("out_" + QString::number(i) + ".png");
+        ui->result_img_box->setPixmap(map);
+        delay(200);
+    }
+    if (mode == 1){
+        for (int i = iteration; i > 0; i--){
+            QPixmap map("out_" + QString::number(i) + ".png");
+            ui->result_img_box->setPixmap(map);
+            delay(200);
+        }
+        QPixmap map(filename_first);
+        ui->result_img_box->setPixmap(map);
+        delay(200);
+    }
+
 }

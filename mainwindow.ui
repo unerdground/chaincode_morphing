@@ -291,7 +291,7 @@ p, li { white-space: pre-wrap; }
          <number>1</number>
         </property>
         <property name="maximum">
-         <number>10</number>
+         <number>24</number>
         </property>
         <property name="value">
          <number>5</number>
@@ -325,7 +325,7 @@ p, li { white-space: pre-wrap; }
       <x>570</x>
       <y>360</y>
       <width>141</width>
-      <height>161</height>
+      <height>211</height>
      </rect>
     </property>
     <property name="title">
@@ -380,6 +380,22 @@ p, li { white-space: pre-wrap; }
      </property>
      <property name="text">
       <string>Start</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="result_button">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>150</y>
+       <width>105</width>
+       <height>35</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Show Result</string>
      </property>
     </widget>
    </widget>

@@ -5,6 +5,7 @@
 #include <QFileDialog>
 #include <algorithm>
 #include <QPair>
+#include <QTime>
 
 #include <imagehandler.h>
 
@@ -18,13 +19,15 @@ class MainWindow : public QMainWindow
 
 public:
 
-    QPair<QString, int> editDistance(QVector<int> source, QVector<int> target);
+    QString editDistance(QVector<int> source, QVector<int> target);
 
     QVector<int> buidCodeByPrescription(QString presc, QVector<int> source, QVector<int> target);
 
+    void delay( int ms);
+
     int min_of_three(int first, int second, int third);
 
-    void morphing(int dist, QString presc, QString first, QString second);
+    void morphing(QString presc, imageHandler source_img, QVector<int> target);
 
     explicit MainWindow(QWidget *parent = nullptr);
 
@@ -47,6 +50,8 @@ private slots:
     void on_button_reverse_clicked();
 
     void on_horizontalSlider_sliderMoved(int position);
+
+    void on_result_button_clicked();
 
 private:
     Ui::MainWindow *ui;
