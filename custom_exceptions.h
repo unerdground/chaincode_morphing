@@ -64,5 +64,11 @@ public:
       }
 };
 
+class equalChainCode : public QException{
+    virtual const char* what() const throw()
+      {
+        return "Image chain codes are equal;";
+      }
+};
 
 #endif // CUSTOM_EXCEPTIONS_H

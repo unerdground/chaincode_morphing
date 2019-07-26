@@ -252,8 +252,11 @@ p, li { white-space: pre-wrap; }
       </item>
       <item>
        <widget class="QRadioButton" name="button_reverse">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
         <property name="text">
-         <string>Morph to reversed original</string>
+         <string>Morph back to X-mirrored original</string>
         </property>
        </widget>
       </item>

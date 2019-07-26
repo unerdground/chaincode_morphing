@@ -33,7 +33,7 @@ public:
     void writeToImageFromString(QString filename);
 
     // print codes to console
-    void writeChaincode();
+    QString writeChaincode();
 
     // return chain code
     QVector<int> getChaincode(){
@@ -41,12 +41,7 @@ public:
     }
     // sets new chaincode
     void setChaincode(QVector<int> new_chaincode){
-        chaincode = new_chaincode;
-    }
-
-    // image size comparison
-    bool isSizeEqual(const imageHandler& second){
-        return (height == second.height && width == second.width);
+        this->chaincode = new_chaincode;
     }
 
     // constructor
@@ -59,6 +54,10 @@ public:
         height = img.height();
         } else throw noImage(filename.toLocal8Bit().constData());
     }
+
+    imageHandler(){}
+
+    ~imageHandler();
 };
 
 #endif // IMAGEHANDLER_H

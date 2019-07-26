@@ -13,8 +13,8 @@ bool imageHandler::isPixelBlack(pixel pix){
 
 // Search for first black pixel line by line
 pixel imageHandler::firstPixel(){
-    for (int width = 0; width < img.width(); width++){
-        for (int height = 0; height < img.height(); height++){
+    for (int height = 0; height < img.height(); height++){
+        for (int width = 0; width < img.width(); width++){
             if (isPixelBlack(pixel(height, width))){
                 return pixel(height, width); // coordinates of a first pixel
             }
@@ -148,9 +148,11 @@ void imageHandler::writeToImageFromString(QString filename){
     img.save(filename);
 }
 
-void imageHandler::writeChaincode(){
+QString imageHandler::writeChaincode(){
+    QString rtn = "";
     for (int counter = 0; counter < chaincode.size(); counter++){
-        std::cout << chaincode[counter] << "; ";
+        rtn += QString::number(chaincode[counter]);
     }
+    return rtn;
 }
 
