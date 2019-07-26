@@ -54,10 +54,6 @@ public:
         height = img.height();
         } else throw noImage(filename.toLocal8Bit().constData());
     }
-
-    imageHandler(){}
-
-    ~imageHandler();
 };
 
 #endif // IMAGEHANDLER_H
