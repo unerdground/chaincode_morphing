@@ -147,7 +147,9 @@ void MainWindow::on_pushButton_clicked()
         first.readStringFromImage();
         second.readStringFromImage();
 
-        QString filename = filename_first;
+        first.writeToImageFromString("out.png");
+
+        //QString filename = filename_first;
         //filename.resize(filename.size() - 4);
        //filename += "_out.png";
 
@@ -219,24 +221,24 @@ void MainWindow::on_horizontalSlider_sliderMoved(int position)
 
 void MainWindow::on_result_button_clicked()
 {
-    QPixmap map(filename_first);
+    QPixmap map("out.png");
     ui->result_img_box->setPixmap(map);
-    delay(200);
+    delay(130);
     //first.writeToImageFromString("out.png");
     for (int i = 1; i <= iteration; i++){
         QPixmap map("out_" + QString::number(i) + ".png");
         ui->result_img_box->setPixmap(map);
-        delay(200);
+        delay(130);
     }
     if (mode == 1){
         for (int i = iteration; i > 0; i--){
             QPixmap map("out_" + QString::number(i) + ".png");
             ui->result_img_box->setPixmap(map);
-            delay(200);
+            delay(130);
         }
-        QPixmap map(filename_first);
+        QPixmap map("out.png");
         ui->result_img_box->setPixmap(map);
-        delay(200);
+        delay(130);
     }
 
 }

@@ -57,7 +57,7 @@ private:
     Ui::MainWindow *ui;
 
     unsigned int mode = 0;
-    int iteration = 5;
+    int iteration = 10;
     QString filename_first = "";
     QString filename_second = "";
 
