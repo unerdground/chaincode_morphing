@@ -22,7 +22,7 @@ int MainWindow::min_of_three(int first, int second, int third){
     else return third;
 }
 
-QString MainWindow::editDistance(QVector<int> source, QVector<int> target){
+QString MainWindow::editDistance(QVector<pixel> source, QVector<pixel> target){
     int** matrix = new int*[source.size() + 1];
     char** edit = new char*[source.size() + 1];
     for (int i = 0; i < source.size() + 1; i++){
@@ -33,21 +33,20 @@ QString MainWindow::editDistance(QVector<int> source, QVector<int> target){
     matrix[0][0] = 0;
     edit[0][0] = 'M';
     for (int iterator = 1; iterator <= target.size(); iterator++){
-        matrix[0][iterator] = iterator;
+        matrix[0][iterator] = matrix[0][iterator - 1] + 10;
         edit[0][iterator] = 'I';
     }
     for (int iterator = 1; iterator <= source.size(); iterator++){
-        matrix[iterator][0] = iterator;
+        matrix[iterator][0] = matrix[iterator - 1][0] + 10;
         edit[iterator][0] = 'D';
         for (int counter = 1; counter <= target.size(); counter++){
             if (source[iterator - 1] != target[counter - 1]){
-            //matrix[iterator][counter] = min_of_three(matrix[iterator - 1][counter], matrix[iterator][counter - 1], matrix[iterator - 1][counter - 1]) + 1;
             if (matrix[iterator][counter - 1] == min_of_three(matrix[iterator - 1][counter], matrix[iterator][counter - 1], matrix[iterator - 1][counter - 1])){
-                matrix[iterator][counter] = matrix[iterator][counter - 1] + 1;
+                matrix[iterator][counter] = matrix[iterator][counter - 1] + 10;
                 edit[iterator][counter] = 'I';
             }
             else if (matrix[iterator - 1][counter] == min_of_three(matrix[iterator - 1][counter], matrix[iterator][counter - 1], matrix[iterator - 1][counter - 1])){
-                matrix[iterator][counter] = matrix[iterator - 1][counter] + 1;
+                matrix[iterator][counter] = matrix[iterator - 1][counter] + 10;
                 edit[iterator][counter] = 'D';
             }
             else if (matrix[iterator - 1][counter - 1] == min_of_three(matrix[iterator - 1][counter], matrix[iterator][counter - 1], matrix[iterator - 1][counter - 1])){
@@ -77,7 +76,9 @@ QString MainWindow::editDistance(QVector<int> source, QVector<int> target){
             }
             else if (tmp == 'D'){
                 iterator--;
-            } else counter--;
+            } else if (tmp == 'I') {
+                counter--;
+            }
         }
     std::reverse(presc.begin(), presc.end());
 
@@ -102,41 +103,37 @@ QVector<int> MainWindow::buidCodeByPrescription(QString presc, QVector<int> sour
     return source;
 }
 
-void MainWindow::morphing(QString presc, imageHandler source_img, QVector<int> target){
-   QVector<int> temp_presc;
-   QVector<int> source = source_img.getChaincode();
-    for (int i = 0; i < presc.size(); i++){
-        if (presc[i] != 'M'){
-            temp_presc.push_back(i);
-        }
-    }
-    int j = 0;
-    for (int i = 1; i < iteration + 1; i++){
-        for (int k = (i - 1)*temp_presc.size()/iteration; k < (i*temp_presc.size()/iteration); k++){
+void MainWindow::morphing(QString presc, imageHandler source_img, QVector<pixel> target){
+   QVector<pixel> source = source_img.getVectors();
+   QVector<pixel> temp_vector;
+   imageHandler temp = source_img;
 
-            if (presc[temp_presc[k]] == 'R'){
-                source[temp_presc[k] - j] = target[temp_presc[k] - j];
-            } else if (presc[temp_presc[k]] == 'I'){
-                source.insert(temp_presc[k] - j, target[temp_presc[k] - j]);
-            } else if (presc[temp_presc[k]] == 'D'){
-                source.remove(temp_presc[k] - j, 1);
-                j++;
-            }
-        }
-        source_img.setChaincode(source);
-        source_img.writeToImageFromString("out_" + QString::number(i) + ".png");
-    }
-}
+    for (int i = 1; i <= iteration; i++){
+        temp_vector.clear();
+        int j = 0;
+        for (int k = 0; k < qMax(source.size(), target.size()); k++){
+            if (presc[k] == 'R'){
+                temp_vector.push_back(pixel((source[k - j].getx() + (((target[k - j].getx() - source[k - j].getx()) * i)/iteration)), (source[k - j].gety() + (((target[k - j].gety() - source[k - j].gety()) * i)/iteration))));
+            } else if (presc[k] == 'I'){
+                temp_vector.push_back(target[k - j]);
+             } else if (presc[k] == 'M'){
+                 temp_vector.push_back(target[k - j]);
+             } else if (presc[k] == 'D') j++;
+         }
+         temp.setVectors(temp_vector);
+         temp.writeToImageFromString("out_" + QString::number(i) + ".png");
+ }
+ }
 
-void MainWindow::delay(int ms){
-    QTime dieTime = QTime::currentTime().addMSecs( ms );
-        while( QTime::currentTime() < dieTime )
-        {
-            QCoreApplication::processEvents( QEventLoop::AllEvents, 100 );
-        }
-}
+ void MainWindow::delay(int ms){
+     QTime dieTime = QTime::currentTime().addMSecs( ms );
+         while( QTime::currentTime() < dieTime )
+         {
+             QCoreApplication::processEvents( QEventLoop::AllEvents, 100 );
+         }
+ }
 
-void MainWindow::on_pushButton_clicked()
+ void MainWindow::on_pushButton_clicked()
 {
     // MAIN ACTION
     try{
@@ -148,21 +145,10 @@ void MainWindow::on_pushButton_clicked()
         second.readStringFromImage();
 
         first.writeToImageFromString("out.png");
+        //ui->final_img_box->setPixmap(QPixmap("out.png"));
 
-        //QString filename = filename_first;
-        //filename.resize(filename.size() - 4);
-       //filename += "_out.png";
-
-
-        // TEST SECTION
-
-
-        //ui->log->setText(editDistance(first.getChaincode(), second.getChaincode()));
-        ui->log->setText(editDistance(first.getChaincode(), second.getChaincode()) + "\n" + first.writeChaincode() + "\n" + second.writeChaincode());
-        morphing(editDistance(first.getChaincode(), second.getChaincode()), first, second.getChaincode());
-
-        //first.setChaincode(buidCodeByPrescription(editDistance(first.getChaincode(), second.getChaincode()), first.getChaincode(), second.getChaincode()));
-        //  END OF TEST SECTION
+        ui->log->setText(editDistance(first.getVectors(), second.getVectors()) + "\n" + first.writeChaincode() + "\n" + second.writeChaincode());
+        morphing(editDistance(first.getVectors(), second.getVectors()), first, second.getVectors());
 
         ui->result_button->setEnabled(1);
 
@@ -207,15 +193,10 @@ void MainWindow::on_button_back_clicked()
     mode = 1;
 }
 
-void MainWindow::on_button_reverse_clicked()
-{
-    mode = 2;
-}
-
 void MainWindow::on_horizontalSlider_sliderMoved(int position)
 {
-    iteration = position;
-    ui->it_counter->setText(QString::number(iteration));
+    iteration = position + 1;
+    ui->it_counter->setText(QString::number(position));
     ui->result_button->setEnabled(0);
 }
 
@@ -224,7 +205,6 @@ void MainWindow::on_result_button_clicked()
     QPixmap map("out.png");
     ui->result_img_box->setPixmap(map);
     delay(130);
-    //first.writeToImageFromString("out.png");
     for (int i = 1; i <= iteration; i++){
         QPixmap map("out_" + QString::number(i) + ".png");
         ui->result_img_box->setPixmap(map);

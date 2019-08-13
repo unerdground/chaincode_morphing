@@ -2,10 +2,12 @@
 #define IMAGEHANDLER_H
 
 #include <QtGui/QImage>
+#include <QPainter>
 #include <QtGui/QColor>
 #include <QVector>
 #include <QPair>
 #include <iostream>
+#include <QtMath>
 
 #include "pixel.h"
 
@@ -15,7 +17,9 @@ private:
     QImage img; // image to work with
     int height;
     int width;
+    int delta = 13;
     QVector<int> chaincode; // chain code of image
+    QVector<pixel> points;
     pixel start;
 public:
     // check if black
@@ -23,15 +27,21 @@ public:
     // find first black pixel in the image
     pixel firstPixel();
 
+    QVector<pixel> getVectors(){
+        return points;
+    }
+
     // turn right or left during contour approach
     pixel turn_left(pixel current, unsigned int prev_dir);
     pixel turn_right(pixel current, unsigned int prev_dir);
 
     // generate chain code of img contour
-    QVector<int> readStringFromImage();
+    void readStringFromImage();
     // draw image from chain code
     void writeToImageFromString(QString filename);
 
+    void generateVectors();
+    int euclidian(pixel first, pixel second);
     // print codes to console
     QString writeChaincode();
 
@@ -42,6 +52,10 @@ public:
     // sets new chaincode
     void setChaincode(QVector<int> new_chaincode){
         this->chaincode = new_chaincode;
+    }
+
+    void setVectors(QVector<pixel> new_vector){
+        points = new_vector;
     }
 
     // constructor
@@ -55,7 +69,7 @@ public:
         } else throw noImage(filename.toLocal8Bit().constData());
     }
 
-    imageHandler(int i_h, int i_w){ height = i_h, width = i_w;}
+    imageHandler(int i_h, int i_w){ height = i_h; width = i_w;}
 };
 
 #endif // IMAGEHANDLER_H
