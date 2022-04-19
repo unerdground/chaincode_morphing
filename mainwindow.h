@@ -19,7 +19,7 @@ class MainWindow : public QMainWindow
 
 public:
 
-    QString editDistance(QVector<pixel> source, QVector<pixel> target);
+    QString editDistance(QVector<int> source, QVector<int> target);
 
     QVector<int> buidCodeByPrescription(QString presc, QVector<int> source, QVector<int> target);
 
@@ -27,7 +27,7 @@ public:
 
     int min_of_three(int first, int second, int third);
 
-    void morphing(QString presc, imageHandler source_img, QVector<pixel> target);
+    void morphing(QString presc, imageHandler source_img, QVector<int> target);
 
     explicit MainWindow(QWidget *parent = nullptr);
 
@@ -47,6 +47,8 @@ private slots:
 
     void on_button_def_clicked();
 
+    void on_button_reverse_clicked();
+
     void on_horizontalSlider_sliderMoved(int position);
 
     void on_result_button_clicked();
@@ -55,7 +57,7 @@ private:
     Ui::MainWindow *ui;
 
     unsigned int mode = 0;
-    int iteration = 11;
+    int iteration = 10;
     QString filename_first = "";
     QString filename_second = "";
 

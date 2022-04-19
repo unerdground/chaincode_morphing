@@ -32,12 +32,6 @@ public:
     bool operator== (const pixel& second){
         return ((x == second.x) && (y == second.y));
     }
-    pixel operator- (const pixel& second){
-        return pixel(this->x - second.x, this->y - second.y);
-    }
-    pixel operator+ (const pixel& second){
-        return pixel(this->x + second.x, this->y + second.y);
-    }
 };
 
 #endif // PIXEL_H
