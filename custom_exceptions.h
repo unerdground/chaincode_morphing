@@ -67,7 +67,7 @@ public:
 class equalChainCode : public QException{
     virtual const char* what() const throw()
       {
-        return "Shapes are equal;";
+        return "Image chain codes are equal;";
       }
 };
 
