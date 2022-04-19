@@ -55,18 +55,41 @@ pixel imageHandler::turn_right(pixel current,unsigned int prev_dir){
     }
 }
 
+int imageHandler::euclidian(pixel first, pixel second){
+    return int(ceil(qSqrt(qPow(qFabs(first.getx() - second.getx()), 2) + qPow(qFabs(first.gety() - second.gety()), 2))));
+}
+
+void imageHandler::generateVectors(){
+    pixel current  = start;
+    for (int i = 1; i < points.size() - 1;){
+        if ((euclidian(current, points[i + 1])) < delta){
+            points.erase(points.begin() + i);
+        }
+        else {
+            current = points[i];
+            i++;
+        }
+    }
+
+
+    for (int i = 0; i < points.size() - 1; i++){
+        points[i] = points[i + 1] - points[i];
+    }
+    points.pop_back();
+}
+
 // Go through contour and generate chain code
 // Approach based on vocabulary of possible moves
-QVector<int> imageHandler::readStringFromImage(){
+void imageHandler::readStringFromImage(){
     if (true == img.isGrayscale()){ // if grayscale
         start = firstPixel();
     } else throw notGrayscale();
     chaincode.clear();
+    points.clear();
+    points.push_back(start);
     unsigned int prev_dir = 1;
     pixel current = start;
     pixel last_black_pixel = current;
-    std::string queue = "";
-
     // using Papert's algoritm for contour approach
     // while not reached first pixel
     do
@@ -76,41 +99,12 @@ QVector<int> imageHandler::readStringFromImage(){
             // check for possible moves during the approach
             // and add chain code
             if (current != last_black_pixel) {
-                queue += std::to_string(prev_dir);
-                if (queue == "0") chaincode.push_back(0);
-                else if (queue == "1") chaincode.push_back(1);
-                else if (queue == "2") chaincode.push_back(2);
-                else if (queue == "3") chaincode.push_back(3);
-
-                else if (queue == "210") chaincode.push_back(1);
-                else if (queue == "103") chaincode.push_back(0);
-                else if (queue == "321") chaincode.push_back(2);
-                else if (queue == "032") chaincode.push_back(3);
-
-                else if (queue == "03") {chaincode.push_back(3);
-                    chaincode.push_back(0);}
-                else if (queue == "01") {chaincode.push_back(1);
-                    chaincode.push_back(0);}
-                else if (queue == "21") {chaincode.push_back(1);
-                    chaincode.push_back(2);}
-                else if (queue == "23") {chaincode.push_back(3);
-                    chaincode.push_back(2);}
-                else if (queue == "10") {chaincode.push_back(0);
-                    chaincode.push_back(1);}
-                else if (queue == "13") {chaincode.push_back(3);
-                    chaincode.push_back(1);}
-                else if (queue == "32") {chaincode.push_back(2);
-                    chaincode.push_back(3);}
-                else if (queue == "30") {chaincode.push_back(0);
-                    chaincode.push_back(3);}
-                else throw wrongApproach(queue);
+                points.push_back(current);
             }
-            queue = ""; // reset queue
             last_black_pixel = current; // set new last black pixel
             current = turn_left(current, prev_dir); // turn left in approach
             prev_dir = (prev_dir + 1) % 4; // update previous direction
         } else { // if in a ground cell
-            queue += std::to_string(prev_dir); // add move to queue
             current = turn_right(current, prev_dir); // turn right in approach
             if (prev_dir == 0) prev_dir = 3; // update previous direction
             else prev_dir--;
@@ -118,7 +112,7 @@ QVector<int> imageHandler::readStringFromImage(){
     }
     while (current != start);
 
-    return chaincode;
+    generateVectors();
 }
 
 void imageHandler::writeToImageFromString(QString filename){
@@ -128,23 +122,19 @@ void imageHandler::writeToImageFromString(QString filename){
 
     img.fill(qRgb(255, 255, 255)); // fill image with white
 
+
     pixel current = start;
     img.setPixel(current.gety(), current.getx(), black);
 
-    for (int counter = 0; counter < chaincode.size(); counter++) { // go through the string
-        if (chaincode[counter] == 0){
-            current.sety(current.gety() + 1);
-        } else if (chaincode[counter] == 1){
-            current.setx(current.getx() + 1);
-        } else if (chaincode[counter] == 2){
-            current.sety(current.gety() - 1);
-        } else if (chaincode[counter] == 3){
-            current.setx(current.getx() - 1);
-        }
-        img.setPixel(current.gety(), current.getx(), black);
+    QPainter p (&img);
+    for (int counter = 0; counter < points.size(); counter++) { // go through the string
+        pixel next = current + points[counter];
+
+        p.drawLine(current.gety(), current.getx(), next.gety(), next.getx());
+        current = next;
          // paint pixels black
     }
-
+    p.drawLine(current.gety(), current.getx(), start.gety(), start.getx());
     img.save(filename);
 }
 
